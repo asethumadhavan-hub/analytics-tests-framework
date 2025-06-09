@@ -1,0 +1,86 @@
+not_null:
+  - table: bizinsights_dev.silver.dim_account_type
+    columns:
+      - account_type
+      - sk_account_type
+  - table: bizinsights_dev.silver.dim_calendar
+    columns:
+      - date_key
+  - table: bizinsights_dev.silver.dim_payment_mode
+    columns:
+      - sk_payment_mode
+  - table: bizinsights_dev.silver.dim_payment_status
+    columns:
+      - sk_payment_status
+  - table: bizinsights_dev.silver.dim_subscriber_activity
+    columns:
+      - sk_activity_id
+      - activity_desc
+
+duplicate:
+  - table: bizinsights_dev.silver.dim_account_type
+    columns:
+      - sk_account_type
+      - [account_type]
+  - table: bizinsights_dev.silver.dim_calendar
+    columns:
+      - date_key
+  - table: bizinsights_dev.silver.dim_payment_mode
+    columns:
+      - sk_payment_mode
+      - [api, card_type, csr, division_id, is_commercial, payment_mode, pd_network, processor]
+  - table: bizinsights_dev.silver.dim_payment_status
+    columns:
+      - sk_payment_status
+      - [payment_status, transaction_status]
+  - table: bizinsights_dev.silver.dim_subscriber_activity
+    columns:
+      - activity_desc
+
+schema_check:
+  - table: bizinsights_dev.silver.dim_account_type
+    columns:
+      - account_type: string
+      - sk_account_type: bigint
+      - insert_timestamp: timestamp
+  - table: bizinsights_dev.silver.dim_calendar
+    columns:
+      - date: date
+      - date_key: int
+      - year: int
+      - month: int
+      - day: int
+      - week: int
+      - day_of_week: int
+      - day_name: string
+      - month_name: string
+      - quarter: int
+      - is_weekend: boolean
+      - first_day_of_month: date
+      - last_day_of_month: date
+  - table: bizinsights_dev.silver.dim_payment_mode
+    columns:
+      - api: string
+      - card_type: string
+      - csr: string
+      - division_id: int
+      - is_commercial: int
+      - payment_mode: string
+      - pd_network: string
+      - processor: string
+      - hash_key: string
+      - sk_payment_mode: bigint
+      - insert_timestamp: timestamp
+  - table: bizinsights_dev.silver.dim_subscriber_activity
+    columns:
+      - activity_desc: string
+      - sk_activity_id: bigint
+      - insert_timestamp: timestamp
+
+row_count:
+  - source_table: bizinsights_dev.silver.payment
+    target_table: bizinsights_dev.silver.fact_payment
+    client: AnalyticsDemoCo
+  - source_table: bizinsights_dev.silver.subscriber_activity
+    target_table: bizinsights_dev.silver.fact_subscriber_activity
+    client: AnalyticsDemoCo
