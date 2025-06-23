@@ -1,23 +1,13 @@
-import pytest
 import yaml
 from functools import lru_cache
-from databricks.connect import DatabricksSession
-
-
-#  Spark Session Fixture — runs once per test session
-@pytest.fixture(scope="session")
-def spark():
-    print("STARTING SPARK SESSION")
-    spark = DatabricksSession.builder.serverless(True).profile("dbc-2f8c933b-7d38").getOrCreate()
-    yield spark
-    print("STOPPING SPARK SESSION")
-    spark.stop()
-
+import os
 
 #  Load YAML metadata (cached)
 @lru_cache()
 def load_metadata():
-    with open("../metadata/metadata.yaml") as f:
+    base_dir = os.path.dirname(__file__)
+    metadata_path = os.path.join(base_dir, "../metadata/metadata.yaml")
+    with open(metadata_path) as f:
         raw = yaml.safe_load(f)
 
 

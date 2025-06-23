@@ -80,7 +80,7 @@ schema_check:
 row_count:
   - source_table: bizinsights_dev.silver.payment
     target_table: bizinsights_dev.silver.fact_payment
-    client: AnalyticsDemoCo
+    client: Reliance_KubraDoc40
   - source_table: bizinsights_dev.silver.subscriber_activity
     target_table: bizinsights_dev.silver.fact_subscriber_activity
-    client: AnalyticsDemoCo
+    client: Reliance_KubraDoc40

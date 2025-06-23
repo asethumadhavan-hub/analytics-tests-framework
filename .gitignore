@@ -1,0 +1,21 @@
+# Python cache and environment
+__pycache__/
+*.py[cod]
+.env
+.venv/
+.idea/
+.DS_Store
+
+# Jupyter and notebooks
+*.ipynb_checkpoints/
+
+# Excel test data
+*.xlsx
+
+# Output and logs
+logs/
+*.log
+
+# Local configs
+config.yaml
+credentials.json
