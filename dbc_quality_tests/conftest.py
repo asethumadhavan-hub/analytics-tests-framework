@@ -4,21 +4,21 @@ import os
 
 #  Load YAML metadata (cached)
 @lru_cache()
-def load_metadata():
+def load_metadata(env):
     base_dir = os.path.dirname(__file__)
-    metadata_path = os.path.join(base_dir, "../metadata/metadata.yaml")
+    metadata_path = path = os.path.join(base_dir, "../metadata", f"metadata_{env}.yaml")
     with open(metadata_path) as f:
         raw = yaml.safe_load(f)
 
 
     not_null_params = [
-        (entry["table"], col)
+        (entry["table"], col, entry.get("filter"))
         for entry in raw.get("not_null", [])
         for col in entry.get("columns", [])
     ]
 
     duplicate_params = [
-        (entry["table"], col_group)
+        (entry["table"], col_group, entry.get("filter"))
         for entry in raw.get("duplicate", [])
         for col_group in entry.get("columns", [])
     ]
@@ -33,7 +33,7 @@ def load_metadata():
         schema_params.append((table, columns))
 
     row_count_params = [
-        (entry["source_table"], entry["target_table"], entry.get("client"))
+        (entry["source_table"], entry["target_table"], entry.get("filter"))
         for entry in raw.get("row_count", [])
     ]
 
@@ -42,12 +42,14 @@ def load_metadata():
         "test_duplicate": duplicate_params,
         "test_data_type": schema_params,
         "test_column_presence": schema_params,
-        "test_row_count": row_count_params
+        "test_row_count": row_count_params,
+        "test_data_comparison": row_count_params
     }
 
 #  Pytest hook to parametrize tests
 def pytest_generate_tests(metafunc):
-    test_map = load_metadata()
+    env = metafunc.config.getoption("env")
+    test_map = load_metadata(env)
     test_name = metafunc.function.__name__
 
     print(f"Test Name: {test_name}")
@@ -57,8 +59,11 @@ def pytest_generate_tests(metafunc):
     if test_name in test_map:
         params = test_map[test_name]
 
-        if test_name == "test_row_count":
-            metafunc.parametrize(("source_table", "target_table", "client"), params)
+        if test_name in ["test_row_count", "test_data_comparison"]:
+            metafunc.parametrize(("source_table", "target_table", "filter_expr"), params)
+
+        elif test_name in ["test_duplicate", "test_not_null"]:
+            metafunc.parametrize(("table_name", "column", "filter_expr"), params)
 
         elif test_name in ["test_column_presence", "test_data_type"]:
             metafunc.parametrize(("table", "columns"), params)

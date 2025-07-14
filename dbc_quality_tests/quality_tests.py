@@ -1,18 +1,21 @@
-from pyspark.sql.functions import col
 from utils.get_table_df import get_table_df
-
 
 #  NOT NULL TEST
 
-def test_not_null(spark, table_name, column):
-    df = get_table_df(spark, table_name)
-    null_count = df.filter(f"{column} IS NULL").count()
+def test_not_null(spark, table_name, column, filter_expr):
+    df = get_table_df(spark, table_name, filter_expr)
+    null_rows = df.filter(f"{column} IS NULL")
+    null_count = null_rows.count()
+    if null_count > 0:
+        print(f"\nNulls found in {table_name}.{column}. Sample rows:")
+        null_rows.select(*df.columns).limit(50).show(truncate=False)
+
     assert null_count == 0, f" Nulls found in {table_name}.{column}"
 
 #  DUPLICATE TEST
 
-def test_duplicate(spark, table_name, column):
-    df = get_table_df(spark, table_name)
+def test_duplicate(spark, table_name, column, filter_expr):
+    df = get_table_df(spark, table_name, filter_expr)
     keys = column if isinstance(column, list) else [column]
 
     dup_count = (
@@ -45,17 +48,6 @@ def test_data_type(spark, table, columns):
         actual_type = df_schema.get(col)
         assert actual_type == expected_type
 
-# ROW COUNT CHECK
 
-def test_row_count(spark, source_table, target_table, client):
-    source_df = get_table_df(spark, source_table)
-    target_df = get_table_df(spark, target_table)
-    if client:
-        source_df = source_df.filter(col("databasename").like(f"{client}%"))
-        target_df = target_df.filter(col("client_name")  == client)
-
-    source_count = source_df.count()
-    target_count = target_df.count()
-    assert source_count == target_count, f"Row count mismatch for client {client}: source={source_count}, target={target_count}"
 
 

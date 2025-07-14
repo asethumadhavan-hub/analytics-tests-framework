@@ -1,0 +1,55 @@
+not_null:
+  - table: bizhq.gold.payment_aggregated
+    columns:
+      - payable_type_name
+      - payable_business_unit_code
+    filter: "transaction_date >= date_sub(current_date(), 30)"
+
+duplicate:
+  - table: bizhq_preprod.silver.payment_transaction
+    columns:
+      - [client_id, realm, payment_id, transaction_type, transaction_status, transaction_event_status]
+    filter: "transaction_event_status = 'AUTHORIZATION_DECLINED'"
+  - table: bizhq_preprod.silver.payment_view_details
+    columns:
+      - [client_id, realm, payment_id, transaction_type, transaction_status, event_status]
+    filter: "event_status = 'AUTHORIZATION_DECLINED'"
+
+schema_check:
+  - table: bizhq_dev.silver.retail_cash_payments
+    columns:
+      - account_type: string
+      - sk_account_type: bigint
+      - insert_timestamp: timestamp
+
+row_count:
+   - source_table: bizhq.gold.payment_aggregated
+     target_table: bizhq_preprod.gold.payment_aggregated
+     filter: "transaction_date BETWEEN date_sub(current_date(), 30) AND date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_batch_orchestrator_post_validation
+     target_table: bizhq_preprod.gold.payment_batch_orchestrator_post_validation
+     filter: "transaction_date BETWEEN date_sub(current_date(), 30) AND date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_batch_orchestrator_post_validation_status
+     target_table: bizhq_preprod.gold.payment_batch_orchestrator_post_validation_status
+     filter: "insert_timestamp < date_sub(current_date(), 2) "
+   - source_table: bizhq.gold.payment_daily_deposit_fees_summary
+     target_table: bizhq_preprod.gold.payment_daily_deposit_fees_summary
+     filter: "report_date_from < date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_daily_deposit_financial_summary
+     target_table: bizhq_preprod.gold.payment_daily_deposit_financial_summary
+     filter: "report_date_from < date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_daily_deposit_transfer_summary
+     target_table: bizhq_preprod.gold.payment_daily_deposit_transfer_summary
+     filter: "report_date_from < date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_daily_financial_activity
+     target_table: bizhq_preprod.gold.payment_daily_financial_activity
+     filter: "transaction_date BETWEEN date_sub(current_date(), 30) AND date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_returns
+     target_table: bizhq_preprod.gold.payment_returns
+     filter: "payment_date < date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_summarized_daily_financial_activity
+     target_table: bizhq_preprod.gold.payment_summarized_daily_financial_activity
+     filter: "banked_date < date_sub(current_date(), 2)"
+   - source_table: bizhq.gold.payment_summary
+     target_table: bizhq_preprod.gold.payment_summary
+     filter: NULL

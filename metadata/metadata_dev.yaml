@@ -1,0 +1,36 @@
+not_null:
+  - table: bizhq_dev.bronze.payment_transaction
+    columns:
+      - itemIncommConfiguration
+      - itemIncommContext
+    filter: "channel = 'RCP' AND insert_date > DATE('2025-06-16')"
+  - table: bizhq_dev.gold.mat_vw_retail_cash_payments
+    columns:
+      - payment_id
+      - realm
+      - client_id
+      - account_number
+      - payment_date
+      - payment_amount
+      - conv_fee_amount
+      - retailer_id
+      - retailer_name
+      - retailer_address
+      - retailer_city
+      - retailer_state
+      - retailer_zip
+      - retailer_country
+      - barcode
+
+duplicate:
+  - table: bizhq_dev.silver.payment_view_details
+    columns:
+      - payment_id
+    filter: "channel = 'RCP'"
+
+row_count:
+  - source_table: bizhq_dev.bronze.retail_cash_payments
+    target_table: bizhq_dev.silver.retail_cash_payments
+    filter: NULL
+
+
